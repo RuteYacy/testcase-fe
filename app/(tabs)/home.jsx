@@ -63,7 +63,6 @@ const fetchTransactionHistory = async (month, year, accessToken) => {
         },
       }
     );
-    console.log(response);
     if (!response.ok) {
       throw new Error("Failed to fetch transaction history");
     }
@@ -75,47 +74,28 @@ const fetchTransactionHistory = async (month, year, accessToken) => {
   }
 };
 
-
-const emotionColorMap = {
-  anger: 'bg-red-700',
-  anxiety: 'bg-orange-600',
-  stress: 'bg-green-700',
-  happiness: 'bg-yellow-400',
-  calm: 'bg-blue-300',
-  neutral: 'bg-gray',
-  sadness: 'bg-blue-500',
-  fear: 'bg-purple-600',
-  surprise: 'bg-pink-600',
-  empty: 'bg-slate-200'
+// Predefined map for all possible categories and their icons
+const categoryMap = {
+  home: <Ionicons name="home-outline" size={24} color="#4645ff" />,
+  other: <MaterialCommunityIcons name="asterisk" size={24} color="#4645ff" />,
+  transactions: <MaterialIcons name="currency-exchange" size={24} color="#4645ff" />,
+  food: <Ionicons name="fast-food-outline" size={24} color="#4645ff" />,
+  education: <SimpleLineIcons name="graduation" size={24} color="#4645ff" />,
+  personal: <Ionicons name="person-outline" size={24} color="#4645ff" />,
+  communication: <SimpleLineIcons name="screen-smartphone" size={24} color="#4645ff" />,
+  entertainment: <MaterialCommunityIcons name="television-play" size={24} color="#4645ff" />,
+  health: <Ionicons name="medkit-outline" size={24} color="#4645ff" />,
+  transport: <Ionicons name="car-sport-outline" size={24} color="#4645ff" />,
+  tax: <MaterialCommunityIcons name="hand-coin-outline" size={24} color="#4645ff" />,
 };
 
-const getCategoryIcon = (category, color) => {
-  switch (category) {
-    case 'home':
-      return <Ionicons name="home-outline" size={24} color={color} />;
-    case 'other':
-      return <MaterialCommunityIcons name="asterisk" size={24} color={color} />;
-    case 'transactions':
-      return <MaterialIcons name="currency-exchange" size={24} color={color} />;
-    case 'food':
-      return <Ionicons name="fast-food-outline" size={24} color={color} />;
-    case 'education':
-      return <SimpleLineIcons name="graduation" size={24} color={color} />;
-    case 'personal':
-      return <Ionicons name="person-outline" size={24} color={color} />;
-    case 'communication':
-      return <SimpleLineIcons name="screen-smartphone" size={24} color={color} />;
-    case 'entertainment':
-      return <MaterialCommunityIcons name="television-play" size={24} color={color} />;
-    case 'health':
-      return <Ionicons name="medkit-outline" size={24} color={color} />;
-    case 'transport':
-      return <Ionicons name="car-sport-outline" size={24} color={color} />;
-    case 'tax':
-      return <MaterialCommunityIcons name="hand-coin-outline" size={24} color={color} />;
-    default:
-      return null;
-  }
+// Function to calculate the bar color
+const getBarColor = (value, absoluteMax) => {
+  if (value < 0) return 'bg-red-800';
+  const percentage = (value / absoluteMax) * 100;
+  if (percentage > 60) return 'bg-blueDark';
+  if (percentage > 20) return 'bg-blueLight';
+  return 'bg-gray';
 };
 
 const Home = () => {
@@ -130,14 +110,18 @@ const Home = () => {
   const minValue = Math.min(...Object.values(data.categories || { 0: 0 }));
   const absoluteMax = Math.max(maxValue, Math.abs(minValue));
 
-  const getBarColor = (value) => {
-    if (value < 0) return 'bg-red-800';
-    const percentage = (value / absoluteMax) * 100;
-    if (percentage > 60) return 'bg-blueDark';
-    if (percentage > 20) return 'bg-blueLight';
-    return 'bg-gray';
+  const emotionColorMap = {
+    anger: 'bg-red-700',
+    anxiety: 'bg-orange-600',
+    stress: 'bg-green-700',
+    happiness: 'bg-yellow-400',
+    calm: 'bg-blue-300',
+    neutral: 'bg-gray',
+    sadness: 'bg-blue-500',
+    fear: 'bg-purple-600',
+    surprise: 'bg-pink-600',
+    empty: 'bg-slate-200'
   };
-
 
   useEffect(() => {
     const currentDate = new Date();
@@ -145,7 +129,7 @@ const Home = () => {
     const currentYear = currentDate.getFullYear();
 
     if (accessToken && userID) {
-      // Fetch user data when component mounts
+      // Fetch user data
       fetchUserData(userID, accessToken).then((data) => {
         if (data) {
           setUserData(data);
@@ -184,12 +168,13 @@ const Home = () => {
 
   return (
     <SafeAreaView className="h-full bg-blueDark">
+      {/* User header */}
       <View className="bg-blueDark p-4 flex-row justify-between">
         <View className="flex-row items-center my-2 ml-0.5">
           <View className="w-10 h-10 bg-blueLight rounded-full justify-center items-center">
-          <Text className="text-whitePrimary uppercase">
-            {userData ? userData.name.charAt(0).toUpperCase() : '+'}
-          </Text>
+            <Text className="text-whitePrimary uppercase">
+              {userData ? userData.name.charAt(0).toUpperCase() : '+'}
+            </Text>
           </View>
           <Text className="text-whitePrimary ml-2 text-lg">
             {userData ? `Hello, ${userData.name}` : 'Loading...'}
@@ -198,6 +183,7 @@ const Home = () => {
       </View>
 
       <ScrollView className="bg-whitePrimary h-full px-3 shadow shadow-slate-900">
+        {/* Balance and Credit Limit */}
         <View className='py-5 flex flex-row justify-between gap-3'>
           <View className='bg-slate-200 px-3 py-3 flex-1 rounded-lg'>
             <Text className="text-black text-base font-mulish-regular">Balance</Text>
@@ -231,6 +217,7 @@ const Home = () => {
           </View>
         </View>
 
+        {/* Daily Emotions */}
         <View className='px-1'>
           <View className="">
             <View className='flex-row items-center justify-between mb-3'>
@@ -258,49 +245,72 @@ const Home = () => {
             </View>
           </View>
 
+          {/* Spendings */}
           <View className='mt-5'>
             <Text className="text-black text-lg mb-3 font-mulish-semi-bold">Spendings</Text>
-            <View className='flex-row justify-around items-end gap-2'>
-              {Object.keys(data.categories).map((category, index) => (
-                <View key={index} className='items-center'>
-                  <View
-                    className={`${getBarColor(data.categories[category])} w-4 rounded mb-3`}
-                    style={{
-                      height: (Math.abs(data.categories[category]) / absoluteMax) * 150,
-                      marginBottom: data.categories[category] < 0 ? 0 : undefined,
-                    }}
-                  />
-                  <Text className='pt-3'>
-                    {getCategoryIcon(category)}
-                  </Text>
-                </View>
-              ))}
+            <View className='flex-row justify-around items-end'>
+              {Object.keys(data.categories).length > 0 ? (
+                Object.keys(data.categories).map((category, index) => (
+                  <View key={index} className='items-center'>
+                    <View
+                      className={`${getBarColor(data.categories[category], absoluteMax)} w-4 rounded mb-3`}
+                      style={{
+                        height: (Math.abs(data.categories[category]) / absoluteMax) * 150,
+                        marginBottom: data.categories[category] < 0 ? 0 : undefined,
+                      }}
+                    />
+                    <Text className='pt-3'>
+                      {categoryMap[category] || null}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                Object.keys(categoryMap).map((category, index) => (
+                  <View key={index} className='items-center'>
+                    <Text className='pt-10'>
+                      {categoryMap[category] || null}
+                    </Text>
+                  </View>
+                ))
+              )}
             </View>
           </View>
 
+          {/* Spending by Category */}
           <View className='mt-8 h-full'>
             <Text className="text-black text-lg mb-1 font-mulish-semi-bold">Spending by Category</Text>
-            {Object.keys(data.categories).map((category, index) => (
-              <View key={index} className='flex-row justify-between items-center py-3 border-b border-slate-300'>
-                <View className='flex-row items-center flex-1 text-center'>
-                  <Text>{getCategoryIcon(category, "#4645ff")}</Text>
-                  <Text className="text-gray-500 text-sm ml-2.5">{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
-                </View>
-                <View className='flex-1 flex flex-row items-center justify-end gap-x-1'>
-                  <View className='flex-col items-end'>
-                    <Text className="text-black text-base font-mulish-regular text-end">
-                      R$ {data.categories[category].toFixed(2)}
-                    </Text>
-                    <Text className="text-slate-500 text-sm text-end">
-                      {(((data.categories[category]) / 1270) * 100).toFixed(1)}%
-                    </Text>
+            {Object.keys(data.categories).length > 0 ? (
+              Object.keys(data.categories).map((category, index) => (
+                <View key={index} className='flex-row justify-between items-center py-3 border-b border-slate-300'>
+                  <View className='flex-row items-center flex-1 text-center'>
+                    <Text>{categoryMap[category]}</Text>
+                    <Text className="text-gray-500 text-sm ml-2.5">{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
                   </View>
-                  <View className='bg-whitePrimary '>
-                    <MaterialIcons name="keyboard-arrow-right" size={20} color="#7d7cff" />
+                  <View className='flex-1 flex flex-row items-center justify-end gap-x-1'>
+                    <View className='flex-col items-end'>
+                      <Text className="text-black text-base font-mulish-regular text-end">
+                        R$ {data.categories[category].toFixed(2)}
+                      </Text>
+                      <Text className="text-slate-500 text-sm text-end">
+                        {(((data.categories[category]) / 1270) * 100).toFixed(1)}%
+                      </Text>
+                    </View>
+                    <View className='bg-whitePrimary '>
+                      <MaterialIcons name="keyboard-arrow-right" size={20} color="#7d7cff" />
+                    </View>
                   </View>
                 </View>
-              </View>
-            ))}
+              ))
+            ) : (
+              Object.keys(categoryMap).map((category, index) => (
+                <View key={index} className='flex-row justify-between items-center py-3 border-b border-slate-300'>
+                  <View className='flex-row items-center flex-1 text-center'>
+                    <Text>{categoryMap[category]}</Text>
+                    <Text className="text-gray-500 text-sm ml-2.5">{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
+                  </View>
+                </View>
+              ))
+            )}
           </View>
 
         </View>
