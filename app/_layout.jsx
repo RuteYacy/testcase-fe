@@ -1,5 +1,5 @@
 import { useFonts } from 'expo-font';
-import { React, useEffect } from 'react';
+import { React, useEffect, useState } from 'react';
 import { SplashScreen, Stack } from 'expo-router';
 
 import AuthProvider from '../context/AuthContext';
@@ -18,14 +18,49 @@ const RooyLayout = () => {
     "Mulish-SemiBold": require("../assets/fonts/Mulish-SemiBold.ttf"),
   });
 
+  const [wsMessage, setWsMessage] = useState(null);
+
   useEffect(() => {
     if (error) throw error;
 
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-
   }, [fontsLoaded, error]);
+
+  useEffect(() => {
+    let ws;
+
+    const connectWebSocket = () => {
+      const ws = new WebSocket('ws://localhost:8000/ws');
+      ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        console.log('Received WebSocket message:', message);
+        setWsMessage(message);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket connection closed. Reconnecting...');
+        setTimeout(connectWebSocket, 5000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
+  }, []);
 
   if (!fontsLoaded) {
     return null;
