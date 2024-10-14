@@ -1,6 +1,5 @@
 import { React, useState, useEffect, useContext } from 'react';
-import { View, Text, ScrollView, SafeAreaView } from 'react-native';
-
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -73,12 +72,26 @@ const TransactionHistory = () => {
 
   const [userData, setUserData] = useState(null);
   const [groupedTransactions, setGroupedTransactions] = useState({});
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const months = [
+    { label: 'January', value: 1 },
+    { label: 'February', value: 2 },
+    { label: 'March', value: 3 },
+    { label: 'April', value: 4 },
+    { label: 'May', value: 5 },
+    { label: 'June', value: 6 },
+    { label: 'July', value: 7 },
+    { label: 'August', value: 8 },
+    { label: 'September', value: 9 },
+    { label: 'October', value: 10 },
+    { label: 'November', value: 11 },
+    { label: 'December', value: 12 },
+  ];
 
   useEffect(() => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear();
-
     if (accessToken && userID) {
       // Fetch user data when component mounts
       fetchUserData(userID, accessToken).then((data) => {
@@ -87,7 +100,7 @@ const TransactionHistory = () => {
         }
       });
 
-      fetchTransactionHistory(currentMonth, currentYear, accessToken).then((transactions) => {
+      fetchTransactionHistory(selectedMonth, selectedYear, accessToken).then((transactions) => {
         // Group transactions by date
         const transactionsByDate = transactions.reduce((acc, transaction) => {
           const date = transaction.created_at;
@@ -101,20 +114,53 @@ const TransactionHistory = () => {
         setGroupedTransactions(transactionsByDate);
       });
     }
-  }, [accessToken]);
+  }, [accessToken, selectedMonth, selectedYear, userID]);
 
   return (
     <SafeAreaView className="h-full bg-blueDark">
       <ScrollView className='bg-whitePrimary'>
         <View className='flex-col items-center'>
-          <View className='border-b border-slate-300 px-5 py-2.5 mt-1.5'>
-            <View className='flex-row justify-between w-full'>
-              <Text className='uppercase text-blueDark font-mulish-semi-bold'>October</Text>
-              <View>
-                <MaterialIcons name="keyboard-arrow-down" size={16} style={{ paddingTop: 5 }} color="#7d7cff" />
+          {/* Month Selection Button */}
+          <View className='px-5 py-2.5'>
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              className='flex-row justify-between w-full'
+              style={{ paddingVertical: 10, borderBottomColor: '#d1d1d1', borderBottomWidth: 1 }}
+            >
+              <Text className='uppercase text-blueDark font-mulish-semi-bold'>
+                {months.find((month) => month.value === selectedMonth)?.label || 'Select Month'}
+              </Text>
+              <MaterialIcons name="keyboard-arrow-down" size={16} color="#7d7cff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Modal for month selection */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+              <View style={{ width: 300, backgroundColor: 'white', borderRadius: 10, padding: 20 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 20 }}>Select Month</Text>
+                {months.map((month) => (
+                  <TouchableOpacity
+                    key={month.value}
+                    onPress={() => {
+                      setSelectedMonth(month.value);
+                      setModalVisible(false);
+                    }}
+                    style={{ paddingVertical: 10 }}
+                  >
+                    <Text style={{ fontSize: 16 }}>{month.label}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
-          </View>
+          </Modal>
+
+          {/* Current Balance */}
           <View className='flex-col items-center pt-6 pb-1'>
             <Text className='text-blueDark text-2xl font-mulish-bold'>
               {userData?.balance ? `$${userData.balance}` : '$ 0.0'}

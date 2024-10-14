@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, ScrollView, SafeAreaView, Image } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, Modal, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import flow from '../../assets/images/white_flowchart.jpg';
@@ -72,15 +72,28 @@ const CreditHistory = () => {
   const { accessToken, userID } = useContext(AuthContext);
 
   const [userData, setUserData] = useState(null);
-  const [creditData, setCreditData] = useState(null);
   const [groupedCreditHistory, setGroupedCreditHistory] = useState({});
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const months = [
+    { label: 'January', value: 1 },
+    { label: 'February', value: 2 },
+    { label: 'March', value: 3 },
+    { label: 'April', value: 4 },
+    { label: 'May', value: 5 },
+    { label: 'June', value: 6 },
+    { label: 'July', value: 7 },
+    { label: 'August', value: 8 },
+    { label: 'September', value: 9 },
+    { label: 'October', value: 10 },
+    { label: 'November', value: 11 },
+    { label: 'December', value: 12 },
+  ];
 
   useEffect(() => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear();
-
-    if (accessToken, userID) {
+    if (accessToken && userID) {
       // Fetch user data when component mounts
       fetchUserData(userID, accessToken).then((data) => {
         if (data) {
@@ -88,7 +101,7 @@ const CreditHistory = () => {
         }
       });
 
-      fetchCreditHistory(currentMonth, currentYear, accessToken).then((creditHistory) => {
+      fetchCreditHistory(selectedMonth, selectedYear, accessToken).then((creditHistory) => {
         // Group credit history by date
         const creditHistoryByDate = creditHistory.reduce((acc, credit) => {
           const date = credit.created_at;
@@ -102,20 +115,52 @@ const CreditHistory = () => {
         setGroupedCreditHistory(creditHistoryByDate);
       });
     }
-  }, [accessToken]);
+  }, [accessToken, selectedMonth, selectedYear, userID]);
 
   return (
     <SafeAreaView className="h-full bg-blueDark">
       <ScrollView className="bg-whitePrimary">
         <View className="flex-col items-center">
-          <View className="border-b border-slate-300 px-5 py-2.5 mt-1.5">
-            <View className="flex-row justify-between w-full">
-              <Text className="uppercase text-blueDark font-mulish-semi-bold">October</Text>
-              <View>
-                <MaterialIcons name="keyboard-arrow-down" size={16} style={{ paddingTop: 5 }} color="#7d7cff" />
+          {/* Month Selection Button */}
+          <View className="px-5 py-2.5">
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              className="flex-row justify-between w-full"
+              style={{ paddingVertical: 10, borderBottomColor: '#d1d1d1', borderBottomWidth: 1 }}
+            >
+              <Text className="uppercase text-blueDark font-mulish-semi-bold">
+                {months.find((month) => month.value === selectedMonth)?.label || 'Select Month'}
+              </Text>
+              <MaterialIcons name="keyboard-arrow-down" size={16} color="#7d7cff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Modal for month selection */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+              <View style={{ width: 300, backgroundColor: 'white', borderRadius: 10, padding: 20 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 20 }}>Select Month</Text>
+                {months.map((month) => (
+                  <TouchableOpacity
+                    key={month.value}
+                    onPress={() => {
+                      setSelectedMonth(month.value);
+                      setModalVisible(false);
+                    }}
+                    style={{ paddingVertical: 10 }}
+                  >
+                    <Text style={{ fontSize: 16 }}>{month.label}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             </View>
-          </View>
+          </Modal>
+
           <Text className="text-black font-mulish-bold text-base my-4">How Does The Credit Work?</Text>
           <View className="w-full h-44 mb-6 bg-[#FFFFFF]">
             <Image source={flow} className="w-full ml-1 h-[180px]" />
@@ -137,9 +182,9 @@ const CreditHistory = () => {
               {groupedCreditHistory[date].map((credit, idx) => (
                 <View key={idx} className="flex-row justify-between items-center border-b border-slate-300 py-3">
                   <View className="gap-y-0.5">
-                  <Text className="text-black font-mulish-bold">
-                    {credit?.credit_limit > 0 ? 'Increase Of Credit' : 'Decrease Of Credit'}
-                  </Text>
+                    <Text className="text-black font-mulish-bold">
+                      {credit?.credit_limit > 0 ? 'Increase Of Credit' : 'Decrease Of Credit'}
+                    </Text>
                     <Text className="text-black font-mulish-regular">Primary Emotion: {' '}
                       {capitalizeFirstLetter(credit.primary_emotion)}
                     </Text>
