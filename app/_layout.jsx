@@ -2,7 +2,6 @@ import { useFonts } from 'expo-font';
 import { React, useEffect, useState } from 'react';
 import { SplashScreen, Stack } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import * as Permissions from 'expo-permissions';
 
 import AuthProvider from '../context/AuthContext';
 
@@ -51,10 +50,14 @@ const RooyLayout = () => {
   }, []);
 
   const showNotification = async (message) => {
+    const riskScore = message.risk_score;
+
+    const formattedMessage = `Your emotional risk is: ${riskScore}. Your credit was updated.`;
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: "New Credit Limit",
-        body: message,
+        body: formattedMessage,
       },
       trigger: null,
     });
