@@ -122,7 +122,7 @@ const CreditHistory = () => {
           </View>
           <View className="flex-col items-center pb-1">
             <Text className="text-blueDark text-2xl font-mulish-bold">
-              {userData?.credit_limit ? `$${userData.credit_limit.toFixed(2)}` : 'Loading...'}
+              {userData?.credit_limit ? `$${userData.credit_limit.toFixed(2)}` : '$ 0.0'}
             </Text>
             <Text className="text-black text-sm mb-6 font-mulish-extra-light">Current Credit</Text>
           </View>

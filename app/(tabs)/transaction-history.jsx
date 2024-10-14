@@ -117,7 +117,7 @@ const TransactionHistory = () => {
           </View>
           <View className='flex-col items-center pt-6 pb-1'>
             <Text className='text-blueDark text-2xl font-mulish-bold'>
-              {userData?.balance ? `$${userData.balance}` : 'Loading...'}
+              {userData?.balance ? `$${userData.balance}` : '$ 0.0'}
             </Text>
             <Text className='text-black text-sm mb-6 font-mulish-extra-light'>Current Balance</Text>
           </View>
