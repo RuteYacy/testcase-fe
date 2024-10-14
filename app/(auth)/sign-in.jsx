@@ -3,6 +3,7 @@ import React, { useState, useContext } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView, StatusBar, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import CustomButton from '../../components/CustomButton';
 
@@ -10,6 +11,7 @@ const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { setAccessToken, setRefreshToken, setUserID } = useContext(AuthContext);
 
@@ -66,8 +68,14 @@ const SignIn = () => {
                         placeholder="Password"
                         value={password}
                         onChangeText={setPassword}
-                        secureTextEntry={true}
+                        secureTextEntry={!showPassword}
                     />
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      className='absolute right-3 top-[17px]'
+                    >
+                        <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#7d7cff" />
+                    </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity>

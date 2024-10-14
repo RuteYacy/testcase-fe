@@ -1,16 +1,18 @@
 import React, { useState, useContext } from 'react';
 import { Link, router } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView, StatusBar, Text, View, TextInput, Alert } from 'react-native';
+import { ScrollView, StatusBar, Text, View, TextInput, Alert, TouchableOpacity } from 'react-native';
 
 import { AuthContext } from '../../context/AuthContext';
 import CustomButton from '../../components/CustomButton';
+import { Ionicons } from '@expo/vector-icons';
 
 const SignUp = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { setAccessToken, setRefreshToken, setUserID } = useContext(AuthContext);
 
@@ -73,14 +75,20 @@ const SignUp = () => {
           </View>
 
           {/* Password Input Field */}
-          <View className="w-full mt-4">
+          <View className="w-full mt-4 relative">
             <TextInput
               className="border border-gray dark:border-slate-500 p-3 font-mulish-light rounded-lg text-lg"
               placeholder="Password"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry={true}
+              secureTextEntry={!showPassword}
             />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              className='absolute right-3 top-[17px]'
+            >
+                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#7d7cff" />
+            </TouchableOpacity>
           </View>
 
           <CustomButton

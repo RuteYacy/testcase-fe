@@ -63,6 +63,7 @@ const fetchTransactionHistory = async (month, year, accessToken) => {
         },
       }
     );
+    console.log(response);
     if (!response.ok) {
       throw new Error("Failed to fetch transaction history");
     }
@@ -201,7 +202,7 @@ const Home = () => {
           <View className='bg-slate-200 px-3 py-3 flex-1 rounded-lg'>
             <Text className="text-black text-base font-mulish-regular">Balance</Text>
             <Text className="text-black text-xl">
-              {userData ? `$ ${userData.balance.toFixed(2)}` : 'Loading...'}
+              {userData && userData.balance !== null ? `$ ${userData.balance.toFixed(2)}` : '0.00'}
             </Text>
             <TouchableOpacity
               className="flex-row items-center"
@@ -216,7 +217,7 @@ const Home = () => {
           <View className='bg-slate-200 px-3 py-3 flex-1 rounded-lg'>
             <Text className="text-black text-base font-mulish-regular">Credit Limit:</Text>
             <Text className="text-black text-xl">
-              {userData ? `$ ${userData.credit_limit.toFixed(2)}` : 'Loading...'}
+              {userData && userData.credit_limit !== null ? `$ ${userData.credit_limit.toFixed(2)}` : '0.00'}
             </Text>
             <TouchableOpacity
               className="flex-row items-center"
