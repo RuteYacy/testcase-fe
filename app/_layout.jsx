@@ -1,6 +1,8 @@
 import { useFonts } from 'expo-font';
 import { React, useEffect, useState } from 'react';
 import { SplashScreen, Stack } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
 
 import AuthProvider from '../context/AuthContext';
 
@@ -28,6 +30,36 @@ const RooyLayout = () => {
     }
   }, [fontsLoaded, error]);
 
+  // Request notification permissions and configure notification settings
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to send notifications is required!');
+      }
+    };
+
+    requestPermissions();
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+      }),
+    });
+  }, []);
+
+  const showNotification = async (message) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "New Credit Limit",
+        body: message,
+      },
+      trigger: null,
+    });
+  };
+
   useEffect(() => {
     let ws;
 
@@ -41,6 +73,9 @@ const RooyLayout = () => {
         const message = JSON.parse(event.data);
         console.log('Received WebSocket message:', message);
         setWsMessage(message);
+
+        // Show a notification for each WebSocket message
+        showNotification(JSON.stringify(message));
       };
 
       ws.onclose = () => {
