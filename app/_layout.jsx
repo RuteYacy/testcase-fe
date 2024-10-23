@@ -1,5 +1,5 @@
 import { useFonts } from 'expo-font';
-import { React, useEffect, useState } from 'react';
+import { React, useEffect } from 'react';
 import { SplashScreen, Stack } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 
@@ -18,8 +18,6 @@ const RooyLayout = () => {
     "Mulish-Regular": require("../assets/fonts/Mulish-Regular.ttf"),
     "Mulish-SemiBold": require("../assets/fonts/Mulish-SemiBold.ttf"),
   });
-
-  const [wsMessage, setWsMessage] = useState(null);
 
   useEffect(() => {
     if (error) throw error;
@@ -51,8 +49,9 @@ const RooyLayout = () => {
 
   const showNotification = async (message) => {
     const riskScore = message.risk_score;
+    const creditLimit = message.credit_limit;
 
-    const formattedMessage = `Your emotional risk is: ${riskScore}. Your credit was updated.`;
+    const formattedMessage = `Your emotional risk is: ${riskScore}. Your new credit is: ${creditLimit}.`;
 
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -75,10 +74,9 @@ const RooyLayout = () => {
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
         console.log('Received WebSocket message:', message);
-        setWsMessage(message);
 
         // Show a notification for each WebSocket message
-        showNotification(JSON.stringify(message));
+        showNotification(message);
       };
 
       ws.onclose = () => {
